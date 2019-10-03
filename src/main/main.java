@@ -12,7 +12,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class main {
-    public static final String url = "https://www.pccomponentes.com/portatiles/pc-para-gaming/ultrabook/workstation";
+    private static final String url = "https://www.pccomponentes.com/portatiles/pc-para-gaming/ultrabook/workstation";
 
 
     public static void main (String args[]) {
@@ -28,16 +28,20 @@ public class main {
                 // Compruebo si me da un 200 al hacer la petición
                 if (getStatusConnectionCode(urlPage) == 200) {
 
-                    // Obtengo el HTML de la web en un objeto Document2
+                    // Obtengo el HTML de la web en un objeto Document
                     Document document = getHtmlDocument(urlPage);
-
-                    // Busco todas las historias de meneame que estan dentro de:
-                    Elements entradas = document.select("div.col-xs-6.col-sm-4.col-md-4.col-lg-4");
-                    for (Element elem : entradas) {
+                    // Guardo en items todos los portatiles
+                    Elements items = document.select("div.col-xs-6.col-sm-4.col-md-4.col-lg-4");
+                    for (Element elem : items) {
+                        //Selecciono el elemento con la etiqueta <a> que contiene las caracteristicas que quiero recuperar
                         Element value = elem.select("a").first();
+                        //Recupero el nombre de portatil
                         String name = value.attr("data-name");
+                        //Si es reacondicionado lo ignoro y paso al siguiente
                         if(!name.contains("Reacondicionado")) {
+                            //Cambio las comillas dobles a simples para no tener problemas con el .csv
                             name = name.replace("\"","'");
+                            //Guardo y imprimo los valores
                             String brand = value.attr("data-brand");
                             String price = value.attr("data-price");
                             String href = value.attr("href");
@@ -53,7 +57,7 @@ public class main {
                 }
             }
             writer.close();
-            System.out.println(num);
+            System.out.println("Se han encontrado " + num + " portatiles");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -64,10 +68,10 @@ public class main {
     /**
      * Devuelve el codigo de la pagina correspondiente al estado de la pagna
      *
-     *@param url
+     *@param url pasamos la url a comprobar
      *@return codigo de respuesta
      */
-    public static int getStatusConnectionCode(String url) {
+    private static int getStatusConnectionCode(String url) {
 
         Response response = null;
 
@@ -82,10 +86,10 @@ public class main {
 
     /**
      * Devuelve el html de la pagina correspondente al enlace que pasamos
-     * @param url
+     * @param url pasamos la url de la que vamos a recuperar el html
      * @return Documento con el HTML
      */
-    public static Document getHtmlDocument(String url) {
+    private static Document getHtmlDocument(String url) {
         try {
             return Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).get();
         } catch (IOException ex) {
